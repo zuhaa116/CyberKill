@@ -5,6 +5,7 @@
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Button.H>
+#include <FL/Fl_Scroll.H>
 #include <string>
 #include <vector>
 #include "PrivacyManager.h"
@@ -36,7 +37,7 @@ private:
     Fl_Window* mainWindow;
     PrivacyManager* manager;
     
-    // Left panel widgets
+    // Top header
     Fl_Box* titleBox;
     Fl_Box* playerNameBox;
     Fl_Box* scorePercentBox;
@@ -44,14 +45,15 @@ private:
     Fl_Box* roundInfoBox;
     Fl_Box* statsBox;
     
+    // Settings buttons
     Fl_Button* twoFaButton;
     Fl_Button* privateButton;
     Fl_Button* appsButton;
     
-    Fl_Box* lastSessionBox;
+    // Activity log
     Fl_Box* logBox;
     
-    // Right panel widgets
+    // Threat display
     Fl_Box* threatsTitle;
     Fl_Box* threat1Box;
     Fl_Button* t1OptionABtn;
