@@ -52,6 +52,7 @@ private:
     
     // Activity log
     Fl_Box* logBox;
+    Fl_Box* lastSessionBox;
     
     // Threat display
     Fl_Box* threatsTitle;
