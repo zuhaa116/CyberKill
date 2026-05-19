@@ -8,7 +8,7 @@
 // Abstract base class
 class Threat {
 protected:
-    bool correctIsA;  // true if option A is correct, false if B is correct
+    bool correctIsA;
 
 public:
     Threat() {
@@ -54,11 +54,11 @@ public:
     }
     
     std::string getOptionA() const override {
-        return correctIsA ? "Reject this request" : "Accept the request";
+        return correctIsA ? "Dismiss request" : "Confirm follow request";
     }
     
     std::string getOptionB() const override {
-        return correctIsA ? "Accept the request" : "Reject this request";
+        return correctIsA ? "Confirm follow request" : "Dismiss request";
     }
     
     int getPenalty() const override {
@@ -73,9 +73,7 @@ public:
         return correctIsA;
     }
     
-    void display() const override {
-        // Implementation for any console output if needed
-    }
+    void display() const override {}
 };
 
 // ============================================
@@ -105,11 +103,11 @@ public:
     }
     
     std::string getOptionA() const override {
-        return correctIsA ? "Block this session" : "Approve this session";
+        return correctIsA ? "Deny this session" : "Approve this session";
     }
     
     std::string getOptionB() const override {
-        return correctIsA ? "Approve this session" : "Block this session";
+        return correctIsA ? "Approve this session" : "Deny this session";
     }
     
     int getPenalty() const override {
@@ -154,11 +152,11 @@ public:
     }
     
     std::string getOptionA() const override {
-        return correctIsA ? "Update my password now" : "Keep current password";
+        return correctIsA ? "Reset my password" : "Keep existing credentials";
     }
     
     std::string getOptionB() const override {
-        return correctIsA ? "Keep current password" : "Update my password now";
+        return correctIsA ? "Keep existing credentials" : "Reset my password";
     }
     
     int getPenalty() const override {
@@ -203,11 +201,11 @@ public:
     }
     
     std::string getOptionA() const override {
-        return correctIsA ? "Remove this app" : "Grant access";
+        return correctIsA ? "Revoke app access" : "Allow app permissions";
     }
     
     std::string getOptionB() const override {
-        return correctIsA ? "Grant access" : "Remove this app";
+        return correctIsA ? "Allow app permissions" : "Revoke app access";
     }
     
     int getPenalty() const override {
