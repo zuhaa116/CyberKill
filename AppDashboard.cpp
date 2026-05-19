@@ -3,30 +3,40 @@
 #include <fstream>
 #include <sstream>
 #include <cstdio>
+#include <cstring>
 
 using namespace std;
 
+// Color palette
+#define COL_BG       fl_rgb_color(18, 18, 18)
+#define COL_PANEL    fl_rgb_color(56, 30, 75)
+#define COL_ACCENT   fl_rgb_color(58, 65, 95)
+#define COL_MUTED    fl_rgb_color(180, 168, 170)
+#define COL_TEXT     fl_rgb_color(220, 215, 225)
+
 // ============ ScoreBar Draw ============
 void ScoreBar::draw() {
-    // Background (light grey)
-    fl_color(240, 240, 240);
-    fl_rectf(x(), y(), w(), h());
+    draw_box();
     
-    // Score bar (colored fill)
-    int fillWidth = (score * w()) / 100;
+    // Background
+    fl_color(COL_PANEL);
+    fl_rectf(x() + 2, y() + 2, w() - 4, h() - 4);
+    
+    // Score bar fill
+    int fillWidth = (score * (w() - 4)) / 100;
     
     if (score >= 75) {
-        fl_color(46, 204, 113);  // Green
+        fl_color(fl_rgb_color(76, 175, 80));  // Green
     } else if (score >= 40) {
-        fl_color(241, 196, 15);  // Gold
+        fl_color(fl_rgb_color(255, 193, 7));  // Amber
     } else {
-        fl_color(231, 76, 60);   // Red
+        fl_color(fl_rgb_color(244, 67, 54));  // Red
     }
     
-    fl_rectf(x(), y(), fillWidth, h());
+    fl_rectf(x() + 2, y() + 2, fillWidth, h() - 4);
     
     // Border
-    fl_color(52, 73, 94);  // Dark blue-grey
+    fl_color(COL_ACCENT);
     fl_rect(x(), y(), w(), h());
 }
 
@@ -37,163 +47,181 @@ AppDashboard::AppDashboard(string playerName)
     
     manager = new PrivacyManager(playerName);
     
-    // Create main window - fullscreen
+    // Create main window
     mainWindow = new Fl_Window(1400, 800, "CyberKill - Social Media Privacy Simulator");
-    mainWindow->color(236, 240, 241);  // Light grey background
+    mainWindow->color(COL_BG);
     
     // ===== TOP HEADER SECTION =====
     titleBox = new Fl_Box(20, 15, 300, 50, "CyberKill");
+    titleBox->box(FL_NO_BOX);
     titleBox->labelfont(FL_HELVETICA_BOLD);
     titleBox->labelsize(36);
-    titleBox->labelcolor(52, 73, 94);  // Dark blue-grey
+    titleBox->labelcolor(COL_TEXT);
     titleBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
     string playerInfo = playerName + " | " + to_string(manager->getUser()->getFollowers()) + " followers";
-    playerNameBox = new Fl_Box(20, 68, 350, 20, playerInfo.c_str());
+    playerNameBox = new Fl_Box(20, 68, 350, 20, strdup(playerInfo.c_str()));
+    playerNameBox->box(FL_NO_BOX);
     playerNameBox->labelfont(FL_HELVETICA);
     playerNameBox->labelsize(12);
-    playerNameBox->labelcolor(44, 62, 80);
+    playerNameBox->labelcolor(COL_MUTED);
     playerNameBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
     string scoreStr = to_string(manager->getUser()->getScore()) + "%";
-    scorePercentBox = new Fl_Box(20, 90, 100, 25, scoreStr.c_str());
+    scorePercentBox = new Fl_Box(20, 90, 100, 25, strdup(scoreStr.c_str()));
+    scorePercentBox->box(FL_NO_BOX);
     scorePercentBox->labelfont(FL_HELVETICA_BOLD);
     scorePercentBox->labelsize(20);
-    scorePercentBox->labelcolor(46, 204, 113);  // Green
+    scorePercentBox->labelcolor(fl_rgb_color(76, 175, 80));  // Green
     scorePercentBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
     scoreBar = new ScoreBar(130, 90, 240, 25, manager->getUser()->getScore());
     scoreBar->box(FL_BORDER_BOX);
     
     string roundStr = "Round: " + to_string(manager->getRoundCount());
-    roundInfoBox = new Fl_Box(400, 68, 150, 20, roundStr.c_str());
+    roundInfoBox = new Fl_Box(400, 68, 150, 20, strdup(roundStr.c_str()));
+    roundInfoBox->box(FL_NO_BOX);
     roundInfoBox->labelfont(FL_HELVETICA);
     roundInfoBox->labelsize(14);
-    roundInfoBox->labelcolor(44, 62, 80);
+    roundInfoBox->labelcolor(COL_MUTED);
     roundInfoBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
     string statsStr = "Blocked: " + to_string(manager->getThreatsBlocked()) 
                     + " | Accepted: " + to_string(manager->getThreatsAccepted());
-    statsBox = new Fl_Box(400, 90, 250, 20, statsStr.c_str());
+    statsBox = new Fl_Box(400, 90, 250, 20, strdup(statsStr.c_str()));
+    statsBox->box(FL_NO_BOX);
     statsBox->labelfont(FL_HELVETICA);
     statsBox->labelsize(12);
-    statsBox->labelcolor(44, 62, 80);
+    statsBox->labelcolor(COL_MUTED);
     statsBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
     // Settings buttons
     twoFaButton = new Fl_Button(700, 68, 100, 35, "2FA: OFF");
     twoFaButton->callback(staticCallback2FA, this);
-    twoFaButton->color(189, 195, 199);  // Light grey
+    twoFaButton->color(COL_ACCENT);
+    twoFaButton->labelcolor(COL_TEXT);
     twoFaButton->labelfont(FL_HELVETICA);
     twoFaButton->labelsize(11);
     
     privateButton = new Fl_Button(810, 68, 100, 35, "Private: OFF");
     privateButton->callback(staticCallbackPrivate, this);
-    privateButton->color(189, 195, 199);
+    privateButton->color(COL_ACCENT);
+    privateButton->labelcolor(COL_TEXT);
     privateButton->labelfont(FL_HELVETICA);
     privateButton->labelsize(11);
     
     appsButton = new Fl_Button(920, 68, 100, 35, "Apps: OFF");
     appsButton->callback(staticCallbackApps, this);
-    appsButton->color(189, 195, 199);
+    appsButton->color(COL_ACCENT);
+    appsButton->labelcolor(COL_TEXT);
     appsButton->labelfont(FL_HELVETICA);
     appsButton->labelsize(11);
     
     // ===== ACTIVITY LOG (LEFT SIDE) =====
-    logBox = new Fl_Box(20, 130, 350, 650, "");
+    logBox = new Fl_Box(20, 130, 350, 620, "");
     logBox->box(FL_BORDER_BOX);
-    logBox->color(255, 255, 255);  // White
+    logBox->color(COL_PANEL);
     logBox->labelfont(FL_COURIER);
     logBox->labelsize(11);
-    logBox->align(FL_ALIGN_TOP_LEFT);
+    logBox->labelcolor(COL_TEXT);
+    logBox->align(FL_ALIGN_TOP_LEFT | FL_ALIGN_INSIDE);
+    
+    // Last session info at bottom of log area
+    lastSessionBox = new Fl_Box(20, 755, 350, 20, "");
+    lastSessionBox->box(FL_NO_BOX);
+    lastSessionBox->labelfont(FL_HELVETICA);
+    lastSessionBox->labelsize(10);
+    lastSessionBox->labelcolor(COL_MUTED);
+    lastSessionBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
     // ===== THREATS SECTION (CENTER/RIGHT) =====
     threatsTitle = new Fl_Box(390, 130, 980, 30, "Active Threats");
+    threatsTitle->box(FL_NO_BOX);
     threatsTitle->labelfont(FL_HELVETICA_BOLD);
     threatsTitle->labelsize(18);
-    threatsTitle->labelcolor(52, 73, 94);
+    threatsTitle->labelcolor(COL_TEXT);
     threatsTitle->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
     // Threat 1
     threat1Box = new Fl_Box(390, 165, 980, 110, "");
     threat1Box->box(FL_BORDER_BOX);
-    threat1Box->color(52, 152, 219);  // Nice blue
+    threat1Box->color(COL_PANEL);
     threat1Box->labelfont(FL_COURIER);
     threat1Box->labelsize(11);
-    threat1Box->labelcolor(255, 255, 255);  // White text
-    threat1Box->align(FL_ALIGN_TOP_LEFT | FL_ALIGN_WRAP);
+    threat1Box->labelcolor(COL_TEXT);
+    threat1Box->align(FL_ALIGN_TOP_LEFT | FL_ALIGN_WRAP | FL_ALIGN_INSIDE);
     
     t1OptionABtn = new Fl_Button(390, 280, 485, 35, "");
     t1OptionABtn->callback(staticCallbackThreat1A, this);
-    t1OptionABtn->color(46, 204, 113);  // Green
+    t1OptionABtn->color(COL_ACCENT);
     t1OptionABtn->labelfont(FL_HELVETICA);
     t1OptionABtn->labelsize(11);
-    t1OptionABtn->labelcolor(255, 255, 255);
+    t1OptionABtn->labelcolor(COL_TEXT);
     
     t1OptionBBtn = new Fl_Button(885, 280, 485, 35, "");
     t1OptionBBtn->callback(staticCallbackThreat1B, this);
-    t1OptionBBtn->color(231, 76, 60);  // Red
+    t1OptionBBtn->color(COL_ACCENT);
     t1OptionBBtn->labelfont(FL_HELVETICA);
     t1OptionBBtn->labelsize(11);
-    t1OptionBBtn->labelcolor(255, 255, 255);
+    t1OptionBBtn->labelcolor(COL_TEXT);
     
     // Threat 2
     threat2Box = new Fl_Box(390, 320, 980, 110, "");
     threat2Box->box(FL_BORDER_BOX);
-    threat2Box->color(155, 89, 182);  // Purple
+    threat2Box->color(COL_PANEL);
     threat2Box->labelfont(FL_COURIER);
     threat2Box->labelsize(11);
-    threat2Box->labelcolor(255, 255, 255);
-    threat2Box->align(FL_ALIGN_TOP_LEFT | FL_ALIGN_WRAP);
+    threat2Box->labelcolor(COL_TEXT);
+    threat2Box->align(FL_ALIGN_TOP_LEFT | FL_ALIGN_WRAP | FL_ALIGN_INSIDE);
     
     t2OptionABtn = new Fl_Button(390, 435, 485, 35, "");
     t2OptionABtn->callback(staticCallbackThreat2A, this);
-    t2OptionABtn->color(46, 204, 113);  // Green
+    t2OptionABtn->color(COL_ACCENT);
     t2OptionABtn->labelfont(FL_HELVETICA);
     t2OptionABtn->labelsize(11);
-    t2OptionABtn->labelcolor(255, 255, 255);
+    t2OptionABtn->labelcolor(COL_TEXT);
     
     t2OptionBBtn = new Fl_Button(885, 435, 485, 35, "");
     t2OptionBBtn->callback(staticCallbackThreat2B, this);
-    t2OptionBBtn->color(231, 76, 60);  // Red
+    t2OptionBBtn->color(COL_ACCENT);
     t2OptionBBtn->labelfont(FL_HELVETICA);
     t2OptionBBtn->labelsize(11);
-    t2OptionBBtn->labelcolor(255, 255, 255);
+    t2OptionBBtn->labelcolor(COL_TEXT);
     
     // Round complete message
     roundCompleteBox = new Fl_Box(390, 480, 980, 50, "");
     roundCompleteBox->box(FL_BORDER_BOX);
-    roundCompleteBox->color(46, 204, 113);  // Green
+    roundCompleteBox->color(COL_ACCENT);
     roundCompleteBox->labelfont(FL_HELVETICA_BOLD);
     roundCompleteBox->labelsize(16);
-    roundCompleteBox->labelcolor(255, 255, 255);
+    roundCompleteBox->labelcolor(COL_TEXT);
     roundCompleteBox->align(FL_ALIGN_CENTER);
     
     // Next round button
     nextRoundBtn = new Fl_Button(1185, 540, 185, 40, "Next Round >>>");
     nextRoundBtn->callback(staticCallbackNextRound, this);
-    nextRoundBtn->color(52, 73, 94);  // Dark blue-grey
+    nextRoundBtn->color(COL_ACCENT);
     nextRoundBtn->labelfont(FL_HELVETICA_BOLD);
     nextRoundBtn->labelsize(12);
-    nextRoundBtn->labelcolor(255, 255, 255);
+    nextRoundBtn->labelcolor(COL_TEXT);
     nextRoundBtn->hide();
     
     // Game over
     gameOverBox = new Fl_Box(450, 250, 850, 200, "");
     gameOverBox->box(FL_ROUNDED_BOX);
-    gameOverBox->color(52, 73, 94);  // Dark blue-grey
+    gameOverBox->color(COL_PANEL);
     gameOverBox->labelfont(FL_HELVETICA_BOLD);
     gameOverBox->labelsize(28);
-    gameOverBox->labelcolor(255, 255, 255);
+    gameOverBox->labelcolor(COL_TEXT);
     gameOverBox->align(FL_ALIGN_CENTER | FL_ALIGN_WRAP);
     gameOverBox->hide();
     
     playAgainBtn = new Fl_Button(1185, 540, 185, 40, "Play Again");
     playAgainBtn->callback(staticCallbackPlayAgain, this);
-    playAgainBtn->color(46, 204, 113);  // Green
+    playAgainBtn->color(COL_ACCENT);
     playAgainBtn->labelfont(FL_HELVETICA_BOLD);
     playAgainBtn->labelsize(12);
-    playAgainBtn->labelcolor(255, 255, 255);
+    playAgainBtn->labelcolor(COL_TEXT);
     playAgainBtn->hide();
     
     mainWindow->end();
@@ -205,37 +233,50 @@ AppDashboard::~AppDashboard() {
 }
 
 void AppDashboard::show() {
+    loadLastSession();
     manager->nextRound();
     updateDisplay();
     mainWindow->show();
 }
 
 void AppDashboard::loadLastSession() {
-    // Not used in new version, but kept for compatibility
+    ifstream file("cyberkill_log.txt");
+    if (!file.is_open()) return;
+    
+    string line, lastLine;
+    while (getline(file, line)) {
+        if (!line.empty()) lastLine = line;
+    }
+    file.close();
+    
+    if (!lastLine.empty()) {
+        string display = "Last: " + lastLine.substr(0, 60);
+        lastSessionBox->copy_label(strdup(display.c_str()));
+    }
 }
 
 void AppDashboard::updateDisplay() {
-    // Update score box
+    // Update score
     string scoreStr = to_string(manager->getUser()->getScore()) + "%";
-    scorePercentBox->copy_label(scoreStr.c_str());
+    scorePercentBox->copy_label(strdup(scoreStr.c_str()));
     scoreBar->setScore(manager->getUser()->getScore());
     
     // Update round info
     string roundStr = "Round: " + to_string(manager->getRoundCount());
-    roundInfoBox->copy_label(roundStr.c_str());
+    roundInfoBox->copy_label(strdup(roundStr.c_str()));
     
     // Update stats
     string statsStr = "Blocked: " + to_string(manager->getThreatsBlocked()) 
                     + " | Accepted: " + to_string(manager->getThreatsAccepted());
-    statsBox->copy_label(statsStr.c_str());
+    statsBox->copy_label(strdup(statsStr.c_str()));
     
     // Update activity log
     vector<string> lastLogs = manager->getLastActivityLog(20);
     string logText = "";
-    for (int i = 0; i < lastLogs.size(); i++) {
+    for (int i = 0; i < (int)lastLogs.size(); i++) {
         logText += lastLogs[i] + "\n";
     }
-    logBox->copy_label(logText.c_str());
+    logBox->copy_label(strdup(logText.c_str()));
     
     // Check win/lose
     if (manager->getUser()->getScore() >= 100) {
@@ -251,15 +292,13 @@ void AppDashboard::updateDisplay() {
 void AppDashboard::updateThreatsDisplay() {
     vector<Threat*> threats = manager->getCurrentThreats();
     
-    if (threats.size() >= 1) {
+    if ((int)threats.size() >= 1) {
         Threat* t1 = threats[0];
-        string t1Text = "⚠ " + t1->getType() + "\n" + t1->getDescription() + "\n" + t1->getDetail();
-        threat1Box->copy_label(t1Text.c_str());
-        
-        t1OptionABtn->copy_label(t1->getOptionA().c_str());
+        string t1Text = "[!] " + t1->getType() + "\n" + t1->getDescription() + "\n" + t1->getDetail();
+        threat1Box->copy_label(strdup(t1Text.c_str()));
+        t1OptionABtn->copy_label(strdup(t1->getOptionA().c_str()));
         t1OptionABtn->show();
-        
-        t1OptionBBtn->copy_label(t1->getOptionB().c_str());
+        t1OptionBBtn->copy_label(strdup(t1->getOptionB().c_str()));
         t1OptionBBtn->show();
     } else {
         threat1Box->copy_label("");
@@ -267,15 +306,13 @@ void AppDashboard::updateThreatsDisplay() {
         t1OptionBBtn->hide();
     }
     
-    if (threats.size() >= 2) {
+    if ((int)threats.size() >= 2) {
         Threat* t2 = threats[1];
-        string t2Text = "⚠ " + t2->getType() + "\n" + t2->getDescription() + "\n" + t2->getDetail();
-        threat2Box->copy_label(t2Text.c_str());
-        
-        t2OptionABtn->copy_label(t2->getOptionA().c_str());
+        string t2Text = "[!] " + t2->getType() + "\n" + t2->getDescription() + "\n" + t2->getDetail();
+        threat2Box->copy_label(strdup(t2Text.c_str()));
+        t2OptionABtn->copy_label(strdup(t2->getOptionA().c_str()));
         t2OptionABtn->show();
-        
-        t2OptionBBtn->copy_label(t2->getOptionB().c_str());
+        t2OptionBBtn->copy_label(strdup(t2->getOptionB().c_str()));
         t2OptionBBtn->show();
     } else {
         threat2Box->copy_label("");
@@ -284,7 +321,7 @@ void AppDashboard::updateThreatsDisplay() {
     }
     
     if (manager->areAllThreatsResolved()) {
-        roundCompleteBox->copy_label("✓ Round Complete!");
+        roundCompleteBox->copy_label("Round Complete!");
         roundCompleteBox->show();
         nextRoundBtn->show();
     } else {
@@ -294,8 +331,8 @@ void AppDashboard::updateThreatsDisplay() {
 }
 
 void AppDashboard::showGameOver(bool won) {
-    string resultText = won ? "🎉 YOU WIN! 🎉\nPrivacy Score: 100%" : "💀 GAME OVER 💀\nPrivacy Score: 0%";
-    gameOverBox->copy_label(resultText.c_str());
+    string resultText = won ? "YOU WIN!\nPrivacy Score: 100%" : "GAME OVER\nPrivacy Score: 0%";
+    gameOverBox->copy_label(strdup(resultText.c_str()));
     gameOverBox->show();
     playAgainBtn->show();
     
@@ -309,12 +346,14 @@ void AppDashboard::showGameOver(bool won) {
     nextRoundBtn->hide();
     
     showingGameOver = true;
+    manager->endGame(won);
     mainWindow->redraw();
 }
 
 void AppDashboard::resetGame() {
+    string oldName = manager->getUser()->getName();
     delete manager;
-    manager = new PrivacyManager(manager->getUser()->getName());
+    manager = new PrivacyManager(oldName);
     resolvedThreats = 0;
     showingGameOver = false;
     
@@ -332,33 +371,27 @@ void AppDashboard::resetGame() {
 void AppDashboard::staticCallback2FA(Fl_Widget* w, void* data) {
     AppDashboard* dash = (AppDashboard*)data;
     dash->manager->toggleSetting(0);
-    
     bool is2FA = dash->manager->getSettings()->getTwoFactor();
     dash->twoFaButton->copy_label(is2FA ? "2FA: ON" : "2FA: OFF");
-    dash->twoFaButton->color(is2FA ? 46 : 189, is2FA ? 204 : 195, is2FA ? 113 : 199);
-    
+    dash->twoFaButton->color(is2FA ? fl_rgb_color(78, 88, 120) : COL_ACCENT);
     dash->updateDisplay();
 }
 
 void AppDashboard::staticCallbackPrivate(Fl_Widget* w, void* data) {
     AppDashboard* dash = (AppDashboard*)data;
     dash->manager->toggleSetting(1);
-    
     bool isPrivate = dash->manager->getSettings()->getProfilePrivate();
     dash->privateButton->copy_label(isPrivate ? "Private: ON" : "Private: OFF");
-    dash->privateButton->color(isPrivate ? 46 : 189, isPrivate ? 204 : 195, isPrivate ? 113 : 199);
-    
+    dash->privateButton->color(isPrivate ? fl_rgb_color(78, 88, 120) : COL_ACCENT);
     dash->updateDisplay();
 }
 
 void AppDashboard::staticCallbackApps(Fl_Widget* w, void* data) {
     AppDashboard* dash = (AppDashboard*)data;
     dash->manager->toggleSetting(2);
-    
     bool isRestricted = dash->manager->getSettings()->getAppsRestricted();
     dash->appsButton->copy_label(isRestricted ? "Apps: ON" : "Apps: OFF");
-    dash->appsButton->color(isRestricted ? 46 : 189, isRestricted ? 204 : 195, isRestricted ? 113 : 199);
-    
+    dash->appsButton->color(isRestricted ? fl_rgb_color(78, 88, 120) : COL_ACCENT);
     dash->updateDisplay();
 }
 
@@ -376,23 +409,23 @@ void AppDashboard::staticCallbackThreat1B(Fl_Widget* w, void* data) {
 
 void AppDashboard::staticCallbackThreat2A(Fl_Widget* w, void* data) {
     AppDashboard* dash = (AppDashboard*)data;
-    dash->manager->resolveThreat(0, true);
+    int idx = (int)dash->manager->getCurrentThreats().size() > 1 ? 1 : 0;
+    dash->manager->resolveThreat(idx, true);
     dash->updateDisplay();
 }
 
 void AppDashboard::staticCallbackThreat2B(Fl_Widget* w, void* data) {
     AppDashboard* dash = (AppDashboard*)data;
-    dash->manager->resolveThreat(0, false);
+    int idx = (int)dash->manager->getCurrentThreats().size() > 1 ? 1 : 0;
+    dash->manager->resolveThreat(idx, false);
     dash->updateDisplay();
 }
 
 void AppDashboard::staticCallbackNextRound(Fl_Widget* w, void* data) {
     AppDashboard* dash = (AppDashboard*)data;
     if (dash->manager->getUser()->getScore() >= 100) {
-        dash->manager->endGame(true);
         dash->showGameOver(true);
     } else if (dash->manager->getUser()->getScore() <= 0) {
-        dash->manager->endGame(false);
         dash->showGameOver(false);
     } else {
         dash->manager->nextRound();
