@@ -1,6 +1,6 @@
 # CyberKill
 
-A small C++ FLTK desktop simulation that teaches social media privacy concepts by letting the player make decisions to handle simulated threats.
+CyberKill is a social media privacy simulator that teaches users to recognize and respond to common online threats; like phishing, scams, and privacy violations, through interactive, timed decision-making. Built in C++ with FLTK, it uses randomized threat scenarios and a passive score-drain mechanic to simulate real-world urgency, reinforcing quick, informed judgment in digital security contexts.
 
 ## What This Demonstrates
 
