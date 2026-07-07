@@ -13,7 +13,7 @@ CyberKill is a social media privacy simulator that teaches users to recognize an
 
 ## Tech Stack
 
-- Language: C++ (C++11) using Object-Oriented Programming principles (inheritance, polymorphism, abstraction, encapsulation, composition)
+- Language: C++ (C++11) using OOP principles.
 - GUI: FLTK
 
 ## Build and Run (Linux example)
