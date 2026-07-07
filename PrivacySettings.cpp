@@ -1,7 +1,5 @@
 #include "PrivacySettings.h"
 
-using namespace std;
-
 PrivacySettings::PrivacySettings(bool initial2FA, bool initialPrivate, bool initialAppsRestricted)
     : twoFactor(initial2FA), profilePrivate(initialPrivate), appsRestricted(initialAppsRestricted) {
 }
@@ -32,7 +30,7 @@ bool PrivacySettings::toggleSetting(int index) {
     return false;
 }
 
-bool PrivacySettings::toggleSetting(string name) {
+bool PrivacySettings::toggleSetting(std::string name) {
     if (name == "2fa") {
         twoFactor = !twoFactor;
         return twoFactor;

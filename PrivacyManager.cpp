@@ -1,20 +1,17 @@
 #include "PrivacyManager.h"
 #include <cstdlib>
 #include <fstream>
-#include <sstream>
 #include <iostream>
 
-using namespace std;
-
-PrivacyManager::PrivacyManager(string playerName)
+PrivacyManager::PrivacyManager(std::string playerName)
     : user(playerName, 1250, 50), settings(false, false, false),
       roundCount(0), threatsBlocked(0), threatsAccepted(0),
       gameOver(false), gameWon(false) {
-    srand(time(0));
+    std::srand(std::time(0));
 }
 
 PrivacyManager::~PrivacyManager() {
-    for (int i = 0; i < currentThreats.size(); i++) {
+    for (size_t i = 0; i < currentThreats.size(); ++i) {
         delete currentThreats[i];
     }
     currentThreats.clear();
@@ -48,27 +45,25 @@ PrivacySettings* PrivacyManager::getSettings() {
     return &settings;
 }
 
-vector<Threat*> PrivacyManager::getCurrentThreats() const {
+std::vector<Threat*> PrivacyManager::getCurrentThreats() const {
     return currentThreats;
 }
 
 void PrivacyManager::spawnThreats() {
-    // Clear old threats
-    for (int i = 0; i < currentThreats.size(); i++) {
+    // Remove previous threats
+    for (size_t i = 0; i < currentThreats.size(); ++i) {
         delete currentThreats[i];
     }
     currentThreats.clear();
     
-    // Spawn 2 different threat types
-    int type1 = rand() % 4;
-    int type2 = rand() % 4;
-    
+    int type1 = std::rand() % 4;
+    int type2 = std::rand() % 4;
     while (type2 == type1) {
-        type2 = rand() % 4;
+        type2 = std::rand() % 4;
     }
     
-    // Create threats by type
-    for (int type : vector<int>{type1, type2}) {
+    std::vector<int> types = {type1, type2};
+    for (int type : types) {
         if (type == 0) {
             currentThreats.push_back(new FakeFriendRequest());
         } else if (type == 1) {
@@ -82,7 +77,7 @@ void PrivacyManager::spawnThreats() {
 }
 
 void PrivacyManager::resolveThreat(int threatIndex, bool chosenOptionA) {
-    if (threatIndex < 0 || threatIndex >= currentThreats.size()) {
+    if (threatIndex < 0 || threatIndex >= static_cast<int>(currentThreats.size())) {
         return;
     }
     
@@ -91,19 +86,19 @@ void PrivacyManager::resolveThreat(int threatIndex, bool chosenOptionA) {
     
     if (isCorrect) {
         int reward = threat->getReward();
-        user.updateScore(reward, "Threat resolved correctly: " + threat->getType());
+        user.updateScore(reward, std::string("Threat resolved correctly: ") + threat->getType());
         threatsBlocked++;
-        addLog("+ Blocked " + threat->getType());
+        addLog(std::string("+ Blocked ") + threat->getType());
     } else {
         int penalty = threat->getPenalty();
-        user.updateScore(-penalty, "Threat mishandled: " + threat->getType());
+        user.updateScore(-penalty, std::string("Threat mishandled: ") + threat->getType());
         threatsAccepted++;
-        addLog("- Accepted " + threat->getType());
+        addLog(std::string("- Accepted ") + threat->getType());
     }
     
     user.clampScore();
     
-    // Remove this threat
+    // Remove threat from the list but do not delete here because destructor handles cleanup
     currentThreats.erase(currentThreats.begin() + threatIndex);
 }
 
@@ -113,7 +108,7 @@ bool PrivacyManager::areAllThreatsResolved() const {
 
 int PrivacyManager::toggleSetting(int index) {
     bool newState = settings.toggleSetting(index);
-    string settingName;
+    std::string settingName;
     int scoreDelta = 0;
     
     if (index == 0) {
@@ -127,23 +122,23 @@ int PrivacyManager::toggleSetting(int index) {
         scoreDelta = newState ? 8 : -8;
     }
     
-    user.updateScore(scoreDelta, "Setting toggled: " + settingName);
+    user.updateScore(scoreDelta, std::string("Setting toggled: ") + settingName);
     user.clampScore();
     
-    addLog(settingName + " " + (newState ? "enabled" : "disabled"));
+    addLog(settingName + (newState ? " enabled" : " disabled"));
     return scoreDelta;
 }
 
-void PrivacyManager::addLog(string action) {
+void PrivacyManager::addLog(std::string action) {
     activityLog.push_back(action);
 }
 
-vector<string> PrivacyManager::getLastActivityLog(int count) const {
-    vector<string> result;
-    int start = (int)activityLog.size() - count;
+std::vector<std::string> PrivacyManager::getLastActivityLog(int count) const {
+    std::vector<std::string> result;
+    int start = static_cast<int>(activityLog.size()) - count;
     if (start < 0) start = 0;
     
-    for (int i = start; i < activityLog.size(); i++) {
+    for (int i = start; i < static_cast<int>(activityLog.size()); ++i) {
         result.push_back(activityLog[i]);
     }
     return result;
@@ -153,16 +148,16 @@ void PrivacyManager::nextRound() {
     roundCount++;
     
     if (roundCount % 3 == 0 && roundCount > 0) {
-        user.updateScore(-6, "Round pressure penalty");
+        user.updateScore(-6, std::string("Round pressure penalty"));
         user.clampScore();
-        addLog("Security degrading (-6)");
+        addLog(std::string("Security degrading ( -6 )"));
     }
     
     spawnThreats();
 }
 
 void PrivacyManager::applyRoundPenalty() {
-    user.updateScore(-6, "Inactivity penalty");
+    user.updateScore(-6, std::string("Inactivity penalty"));
     user.clampScore();
 }
 
@@ -173,12 +168,12 @@ void PrivacyManager::endGame(bool won) {
 }
 
 void PrivacyManager::saveGameLog() {
-    ofstream file("cyberkill_log.txt", ios::app);
+    std::ofstream file("cyberkill_log.txt", std::ios::app);
     if (file.is_open()) {
-        string result = gameWon ? "WIN" : "LOSS";
+        std::string result = gameWon ? "WIN" : "LOSS";
         file << "Player: " << user.getName() << " | Score: " << user.getScore()
              << "% | Rounds: " << roundCount << " | Blocked: " << threatsBlocked
-             << " | Accepted: " << threatsAccepted << " | Result: " << result << endl;
+             << " | Accepted: " << threatsAccepted << " | Result: " << result << std::endl;
         file.close();
     }
 }

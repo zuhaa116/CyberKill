@@ -1,11 +1,7 @@
 #include "AppDashboard.h"
 #include <FL/fl_draw.H>
 #include <fstream>
-#include <sstream>
-#include <cstdio>
-#include <cstring>
-
-using namespace std;
+#include <iostream>
 
 // Color palette
 #define COL_BG       fl_rgb_color(18, 18, 18)
@@ -14,44 +10,43 @@ using namespace std;
 #define COL_MUTED    fl_rgb_color(180, 168, 170)
 #define COL_TEXT     fl_rgb_color(220, 215, 225)
 
-// ============ ScoreBar Draw ============
+// ScoreBar draw
 void ScoreBar::draw() {
     draw_box();
     
-    // Background
+    // Draw background for the bar
     fl_color(COL_PANEL);
     fl_rectf(x() + 2, y() + 2, w() - 4, h() - 4);
     
-    // Score bar fill
+    // Compute fill width from score
     int fillWidth = (score * (w() - 4)) / 100;
     
     if (score >= 75) {
-        fl_color(fl_rgb_color(76, 175, 80));  // Green
+        fl_color(fl_rgb_color(76, 175, 80));
     } else if (score >= 40) {
-        fl_color(fl_rgb_color(255, 193, 7));  // Amber
+        fl_color(fl_rgb_color(255, 193, 7));
     } else {
-        fl_color(fl_rgb_color(244, 67, 54));  // Red
+        fl_color(fl_rgb_color(244, 67, 54));
     }
     
     fl_rectf(x() + 2, y() + 2, fillWidth, h() - 4);
     
-    // Border
+    // Draw border
     fl_color(COL_ACCENT);
     fl_rect(x(), y(), w(), h());
 }
 
-// ============ AppDashboard Implementation ============
-
-AppDashboard::AppDashboard(string playerName)
+// AppDashboard implementation
+AppDashboard::AppDashboard(std::string playerName)
     : resolvedThreats(0), showingGameOver(false) {
     
     manager = new PrivacyManager(playerName);
     
-    // Create main window
+    // Create main window and set background color
     mainWindow = new Fl_Window(1400, 800, "CyberKill - Social Media Privacy Simulator");
     mainWindow->color(COL_BG);
     
-    // ===== TOP HEADER SECTION =====
+    // Title and header info
     titleBox = new Fl_Box(20, 15, 300, 50, "CyberKill");
     titleBox->box(FL_NO_BOX);
     titleBox->labelfont(FL_HELVETICA_BOLD);
@@ -59,36 +54,36 @@ AppDashboard::AppDashboard(string playerName)
     titleBox->labelcolor(COL_TEXT);
     titleBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
-    string playerInfo = playerName + " | " + to_string(manager->getUser()->getFollowers()) + " followers";
-    playerNameBox = new Fl_Box(20, 68, 350, 20, strdup(playerInfo.c_str()));
+    std::string playerInfo = playerName + " | " + std::to_string(manager->getUser()->getFollowers()) + " followers";
+    playerNameBox = new Fl_Box(20, 68, 350, 20, playerInfo.c_str());
     playerNameBox->box(FL_NO_BOX);
     playerNameBox->labelfont(FL_HELVETICA);
     playerNameBox->labelsize(12);
     playerNameBox->labelcolor(COL_MUTED);
     playerNameBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
-    string scoreStr = to_string(manager->getUser()->getScore()) + "%";
-    scorePercentBox = new Fl_Box(20, 90, 100, 25, strdup(scoreStr.c_str()));
+    std::string scoreStr = std::to_string(manager->getUser()->getScore()) + "%";
+    scorePercentBox = new Fl_Box(20, 90, 100, 25, scoreStr.c_str());
     scorePercentBox->box(FL_NO_BOX);
     scorePercentBox->labelfont(FL_HELVETICA_BOLD);
     scorePercentBox->labelsize(20);
-    scorePercentBox->labelcolor(fl_rgb_color(76, 175, 80));  // Green
+    scorePercentBox->labelcolor(fl_rgb_color(76, 175, 80));
     scorePercentBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
     scoreBar = new ScoreBar(130, 90, 240, 25, manager->getUser()->getScore());
     scoreBar->box(FL_BORDER_BOX);
     
-    string roundStr = "Round: " + to_string(manager->getRoundCount());
-    roundInfoBox = new Fl_Box(400, 68, 150, 20, strdup(roundStr.c_str()));
+    std::string roundStr = "Round: " + std::to_string(manager->getRoundCount());
+    roundInfoBox = new Fl_Box(400, 68, 150, 20, roundStr.c_str());
     roundInfoBox->box(FL_NO_BOX);
     roundInfoBox->labelfont(FL_HELVETICA);
     roundInfoBox->labelsize(14);
     roundInfoBox->labelcolor(COL_MUTED);
     roundInfoBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
-    string statsStr = "Blocked: " + to_string(manager->getThreatsBlocked()) 
-                    + " | Accepted: " + to_string(manager->getThreatsAccepted());
-    statsBox = new Fl_Box(400, 90, 250, 20, strdup(statsStr.c_str()));
+    std::string statsStr = "Blocked: " + std::to_string(manager->getThreatsBlocked()) 
+                    + " | Accepted: " + std::to_string(manager->getThreatsAccepted());
+    statsBox = new Fl_Box(400, 90, 250, 20, statsStr.c_str());
     statsBox->box(FL_NO_BOX);
     statsBox->labelfont(FL_HELVETICA);
     statsBox->labelsize(12);
@@ -117,7 +112,7 @@ AppDashboard::AppDashboard(string playerName)
     appsButton->labelfont(FL_HELVETICA);
     appsButton->labelsize(11);
     
-    // ===== ACTIVITY LOG (LEFT SIDE) =====
+    // Activity log area
     logBox = new Fl_Box(20, 130, 350, 620, "");
     logBox->box(FL_BORDER_BOX);
     logBox->color(COL_PANEL);
@@ -126,7 +121,7 @@ AppDashboard::AppDashboard(string playerName)
     logBox->labelcolor(COL_TEXT);
     logBox->align(FL_ALIGN_TOP_LEFT | FL_ALIGN_INSIDE);
     
-    // Last session info at bottom of log area
+    // Last session info
     lastSessionBox = new Fl_Box(20, 755, 350, 20, "");
     lastSessionBox->box(FL_NO_BOX);
     lastSessionBox->labelfont(FL_HELVETICA);
@@ -134,7 +129,7 @@ AppDashboard::AppDashboard(string playerName)
     lastSessionBox->labelcolor(COL_MUTED);
     lastSessionBox->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
     
-    // ===== THREATS SECTION (CENTER/RIGHT) =====
+    // Threats header
     threatsTitle = new Fl_Box(390, 130, 980, 30, "Active Threats");
     threatsTitle->box(FL_NO_BOX);
     threatsTitle->labelfont(FL_HELVETICA_BOLD);
@@ -206,7 +201,7 @@ AppDashboard::AppDashboard(string playerName)
     nextRoundBtn->labelcolor(COL_TEXT);
     nextRoundBtn->hide();
     
-    // Game over
+    // Game over display
     gameOverBox = new Fl_Box(450, 250, 850, 200, "");
     gameOverBox->box(FL_ROUNDED_BOX);
     gameOverBox->color(COL_PANEL);
@@ -240,45 +235,45 @@ void AppDashboard::show() {
 }
 
 void AppDashboard::loadLastSession() {
-    ifstream file("cyberkill_log.txt");
+    std::ifstream file("cyberkill_log.txt");
     if (!file.is_open()) return;
     
-    string line, lastLine;
-    while (getline(file, line)) {
+    std::string line;
+    std::string lastLine;
+    while (std::getline(file, line)) {
         if (!line.empty()) lastLine = line;
     }
     file.close();
     
     if (!lastLine.empty()) {
-        string display = "Last: " + lastLine.substr(0, 60);
-        lastSessionBox->copy_label(strdup(display.c_str()));
+        std::string display = "Last: " + lastLine.substr(0, 60);
+        lastSessionBox->copy_label(display.c_str());
     }
 }
 
 void AppDashboard::updateDisplay() {
-    // Update score
-    string scoreStr = to_string(manager->getUser()->getScore()) + "%";
-    scorePercentBox->copy_label(strdup(scoreStr.c_str()));
+    // Update score display
+    std::string scoreStr = std::to_string(manager->getUser()->getScore()) + "%";
+    scorePercentBox->copy_label(scoreStr.c_str());
     scoreBar->setScore(manager->getUser()->getScore());
     
-    // Update round info
-    string roundStr = "Round: " + to_string(manager->getRoundCount());
-    roundInfoBox->copy_label(strdup(roundStr.c_str()));
+    // Update round and stats
+    std::string roundStr = "Round: " + std::to_string(manager->getRoundCount());
+    roundInfoBox->copy_label(roundStr.c_str());
     
-    // Update stats
-    string statsStr = "Blocked: " + to_string(manager->getThreatsBlocked()) 
-                    + " | Accepted: " + to_string(manager->getThreatsAccepted());
-    statsBox->copy_label(strdup(statsStr.c_str()));
+    std::string statsStr = "Blocked: " + std::to_string(manager->getThreatsBlocked()) 
+                    + " | Accepted: " + std::to_string(manager->getThreatsAccepted());
+    statsBox->copy_label(statsStr.c_str());
     
     // Update activity log
-    vector<string> lastLogs = manager->getLastActivityLog(20);
-    string logText = "";
-    for (int i = 0; i < (int)lastLogs.size(); i++) {
+    std::vector<std::string> lastLogs = manager->getLastActivityLog(20);
+    std::string logText;
+    for (size_t i = 0; i < lastLogs.size(); ++i) {
         logText += lastLogs[i] + "\n";
     }
-    logBox->copy_label(strdup(logText.c_str()));
+    logBox->copy_label(logText.c_str());
     
-    // Check win/lose
+    // Check win or lose
     if (manager->getUser()->getScore() >= 100) {
         showGameOver(true);
     } else if (manager->getUser()->getScore() <= 0) {
@@ -290,15 +285,15 @@ void AppDashboard::updateDisplay() {
 }
 
 void AppDashboard::updateThreatsDisplay() {
-    vector<Threat*> threats = manager->getCurrentThreats();
+    std::vector<Threat*> threats = manager->getCurrentThreats();
     
-    if ((int)threats.size() >= 1) {
+    if (threats.size() >= 1) {
         Threat* t1 = threats[0];
-        string t1Text = "[!] " + t1->getType() + "\n" + t1->getDescription() + "\n" + t1->getDetail();
-        threat1Box->copy_label(strdup(t1Text.c_str()));
-        t1OptionABtn->copy_label(strdup(t1->getOptionA().c_str()));
+        std::string t1Text = "[!] " + t1->getType() + "\n" + t1->getDescription() + "\n" + t1->getDetail();
+        threat1Box->copy_label(t1Text.c_str());
+        t1OptionABtn->copy_label(t1->getOptionA().c_str());
         t1OptionABtn->show();
-        t1OptionBBtn->copy_label(strdup(t1->getOptionB().c_str()));
+        t1OptionBBtn->copy_label(t1->getOptionB().c_str());
         t1OptionBBtn->show();
     } else {
         threat1Box->copy_label("");
@@ -306,13 +301,13 @@ void AppDashboard::updateThreatsDisplay() {
         t1OptionBBtn->hide();
     }
     
-    if ((int)threats.size() >= 2) {
+    if (threats.size() >= 2) {
         Threat* t2 = threats[1];
-        string t2Text = "[!] " + t2->getType() + "\n" + t2->getDescription() + "\n" + t2->getDetail();
-        threat2Box->copy_label(strdup(t2Text.c_str()));
-        t2OptionABtn->copy_label(strdup(t2->getOptionA().c_str()));
+        std::string t2Text = "[!] " + t2->getType() + "\n" + t2->getDescription() + "\n" + t2->getDetail();
+        threat2Box->copy_label(t2Text.c_str());
+        t2OptionABtn->copy_label(t2->getOptionA().c_str());
         t2OptionABtn->show();
-        t2OptionBBtn->copy_label(strdup(t2->getOptionB().c_str()));
+        t2OptionBBtn->copy_label(t2->getOptionB().c_str());
         t2OptionBBtn->show();
     } else {
         threat2Box->copy_label("");
@@ -331,8 +326,8 @@ void AppDashboard::updateThreatsDisplay() {
 }
 
 void AppDashboard::showGameOver(bool won) {
-    string resultText = won ? "YOU WIN!\nPrivacy Score: 100%" : "GAME OVER\nPrivacy Score: 0%";
-    gameOverBox->copy_label(strdup(resultText.c_str()));
+    std::string resultText = won ? "YOU WIN!\nPrivacy Score: 100%" : "GAME OVER\nPrivacy Score: 0%";
+    gameOverBox->copy_label(resultText.c_str());
     gameOverBox->show();
     playAgainBtn->show();
     
@@ -351,7 +346,7 @@ void AppDashboard::showGameOver(bool won) {
 }
 
 void AppDashboard::resetGame() {
-    string oldName = manager->getUser()->getName();
+    std::string oldName = manager->getUser()->getName();
     delete manager;
     manager = new PrivacyManager(oldName);
     resolvedThreats = 0;
@@ -366,10 +361,9 @@ void AppDashboard::resetGame() {
     updateDisplay();
 }
 
-// ============ Callbacks ============
-
+// Callbacks for UI buttons
 void AppDashboard::staticCallback2FA(Fl_Widget* w, void* data) {
-    AppDashboard* dash = (AppDashboard*)data;
+    AppDashboard* dash = static_cast<AppDashboard*>(data);
     dash->manager->toggleSetting(0);
     bool is2FA = dash->manager->getSettings()->getTwoFactor();
     dash->twoFaButton->copy_label(is2FA ? "2FA: ON" : "2FA: OFF");
@@ -378,7 +372,7 @@ void AppDashboard::staticCallback2FA(Fl_Widget* w, void* data) {
 }
 
 void AppDashboard::staticCallbackPrivate(Fl_Widget* w, void* data) {
-    AppDashboard* dash = (AppDashboard*)data;
+    AppDashboard* dash = static_cast<AppDashboard*>(data);
     dash->manager->toggleSetting(1);
     bool isPrivate = dash->manager->getSettings()->getProfilePrivate();
     dash->privateButton->copy_label(isPrivate ? "Private: ON" : "Private: OFF");
@@ -387,7 +381,7 @@ void AppDashboard::staticCallbackPrivate(Fl_Widget* w, void* data) {
 }
 
 void AppDashboard::staticCallbackApps(Fl_Widget* w, void* data) {
-    AppDashboard* dash = (AppDashboard*)data;
+    AppDashboard* dash = static_cast<AppDashboard*>(data);
     dash->manager->toggleSetting(2);
     bool isRestricted = dash->manager->getSettings()->getAppsRestricted();
     dash->appsButton->copy_label(isRestricted ? "Apps: ON" : "Apps: OFF");
@@ -396,33 +390,35 @@ void AppDashboard::staticCallbackApps(Fl_Widget* w, void* data) {
 }
 
 void AppDashboard::staticCallbackThreat1A(Fl_Widget* w, void* data) {
-    AppDashboard* dash = (AppDashboard*)data;
+    AppDashboard* dash = static_cast<AppDashboard*>(data);
     dash->manager->resolveThreat(0, true);
     dash->updateDisplay();
 }
 
 void AppDashboard::staticCallbackThreat1B(Fl_Widget* w, void* data) {
-    AppDashboard* dash = (AppDashboard*)data;
+    AppDashboard* dash = static_cast<AppDashboard*>(data);
     dash->manager->resolveThreat(0, false);
     dash->updateDisplay();
 }
 
 void AppDashboard::staticCallbackThreat2A(Fl_Widget* w, void* data) {
-    AppDashboard* dash = (AppDashboard*)data;
-    int idx = (int)dash->manager->getCurrentThreats().size() > 1 ? 1 : 0;
+    AppDashboard* dash = static_cast<AppDashboard*>(data);
+    size_t s = dash->manager->getCurrentThreats().size();
+    int idx = s > 1 ? 1 : 0;
     dash->manager->resolveThreat(idx, true);
     dash->updateDisplay();
 }
 
 void AppDashboard::staticCallbackThreat2B(Fl_Widget* w, void* data) {
-    AppDashboard* dash = (AppDashboard*)data;
-    int idx = (int)dash->manager->getCurrentThreats().size() > 1 ? 1 : 0;
+    AppDashboard* dash = static_cast<AppDashboard*>(data);
+    size_t s = dash->manager->getCurrentThreats().size();
+    int idx = s > 1 ? 1 : 0;
     dash->manager->resolveThreat(idx, false);
     dash->updateDisplay();
 }
 
 void AppDashboard::staticCallbackNextRound(Fl_Widget* w, void* data) {
-    AppDashboard* dash = (AppDashboard*)data;
+    AppDashboard* dash = static_cast<AppDashboard*>(data);
     if (dash->manager->getUser()->getScore() >= 100) {
         dash->showGameOver(true);
     } else if (dash->manager->getUser()->getScore() <= 0) {
@@ -434,6 +430,6 @@ void AppDashboard::staticCallbackNextRound(Fl_Widget* w, void* data) {
 }
 
 void AppDashboard::staticCallbackPlayAgain(Fl_Widget* w, void* data) {
-    AppDashboard* dash = (AppDashboard*)data;
+    AppDashboard* dash = static_cast<AppDashboard*>(data);
     dash->resetGame();
 }
