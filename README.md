@@ -45,6 +45,7 @@ g++ -std=c++11 main.cpp AppDashboard.cpp PrivacyManager.cpp PrivacySettings.cpp 
 - If you want a packaged binary for a client demo, build for the target operating system and attach the binary to a release.
 
 
-## License
+## Copyright
 
-This repository includes an MIT license. See LICENSE.
+© 2026 ZuhaaNadeem, Eman Fatima, Emaan Abrar. All rights reserved. This project and its content, including code, design, and assets, may not be copied, reproduced, or reused without permission.
+
