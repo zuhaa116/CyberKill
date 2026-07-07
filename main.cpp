@@ -2,23 +2,21 @@
 #include <string>
 #include "AppDashboard.h"
 
-using namespace std;
-
 int main(int argc, char* argv[]) {
-    cout << "================================" << endl;
-    cout << "  CyberKill - Privacy Simulator" << endl;
-    cout << "================================" << endl;
-    cout << endl;
+    std::cout << "================================" << std::endl;
+    std::cout << "  CyberKill - Privacy Simulator" << std::endl;
+    std::cout << "================================" << std::endl;
+    std::cout << std::endl;
     
-    string playerName;
-    cout << "Enter your username: ";
-    getline(cin, playerName);
+    std::string playerName;
+    std::cout << "Enter your username: ";
+    std::getline(std::cin, playerName);
     
     if (playerName.empty()) {
         playerName = "Player";
     }
     
-    cout << "Starting game for " << playerName << "..." << endl << endl;
+    std::cout << "Starting game for " << playerName << "..." << std::endl << std::endl;
     
     AppDashboard dashboard(playerName);
     dashboard.show();

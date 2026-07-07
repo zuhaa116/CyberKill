@@ -1,12 +1,10 @@
 #include "UserProfile.h"
 
-using namespace std;
-
-UserProfile::UserProfile(string playerName, int initialFollowers, int initialScore)
+UserProfile::UserProfile(std::string playerName, int initialFollowers, int initialScore)
     : name(playerName), followers(initialFollowers), privacyScore(initialScore) {
 }
 
-string UserProfile::getName() const {
+std::string UserProfile::getName() const {
     return name;
 }
 
@@ -22,9 +20,9 @@ void UserProfile::updateScore(int delta) {
     privacyScore += delta;
 }
 
-void UserProfile::updateScore(int delta, string reason) {
+void UserProfile::updateScore(int delta, std::string reason) {
     privacyScore += delta;
-    // The reason is logged by PrivacyManager, we just apply the delta here
+    // The reason is stored by PrivacyManager for logging purposes
 }
 
 void UserProfile::clampScore() {

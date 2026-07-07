@@ -1,0 +1,38 @@
+# Build and output
+/build/
+/bin/
+/obj/
+*.o
+*.obj
+*.exe
+*.out
+a.out
+
+# Libraries
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+
+# Logs
+cyberkill_log.txt
+*.log
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.suo
+*.user
+*.userprefs
+
+# Backup and temp files
+*~
+*.tmp
+*.swp
