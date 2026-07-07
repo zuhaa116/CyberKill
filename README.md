@@ -7,6 +7,8 @@ CyberKill is a social media privacy simulator that teaches users to recognize an
 - **Inheritance**: Threat is an abstract base class with concrete subclasses (FakeFriendRequest, SuspiciousLogin, DataLeak, MaliciousApp) implemented in Threat.h. Each subclass implements specific behavior for its type.
 - **Polymorphism**: The app treats different Threat subclasses through the Threat interface. See PrivacyManager::spawnThreats and AppDashboard::updateThreatsDisplay for how virtual methods are used to display and handle threats.
 - **Encapsulation**: UserProfile and PrivacySettings keep internal state private and expose access through public methods. Check UserProfile.h and PrivacySettings.h for examples.
+- **Abstraction**: Threat exposes a clean virtual interface (e.g. handle(), display()) while hiding implementation details of each subclass, so the rest of the app interacts with threats generically.
+- **Composition**: PrivacyManager is composed of a UserProfile and a collection of Threat objects, coordinating their interaction rather than inheriting from them.
 - **Resource management**: PrivacyManager owns dynamically created Threat objects and deletes them in its destructor.
 
 ## Tech Stack
