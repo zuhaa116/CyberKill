@@ -44,9 +44,6 @@ g++ -std=c++11 main.cpp AppDashboard.cpp PrivacyManager.cpp PrivacySettings.cpp 
 - The app writes a runtime log file named cyberkill_log.txt. This file is excluded from version control by .gitignore.
 - If you want a packaged binary for a client demo, build for the target operating system and attach the binary to a release.
 
-## Demo
-
-Add a screenshot or short animated GIF to the assets/ directory and reference it here.
 
 ## License
 
